@@ -17,7 +17,8 @@ chromadb>=0.6.3
 # (no API key, runs on your own machine — install Ollama separately
 # from https://ollama.com and run `ollama pull qwen2.5:3b`).
 langchain>=0.3.19
-langchain-ollama>=0.2.3         # for local "ollama:..." models
+langchain-groq>=1.1.2
+#langchain-ollama>=0.2.3         # for local "ollama:..." models
 # langchain-openai>=0.3.7      # for "openai:..." models
 # langchain-anthropic>=0.3.7   # for "anthropic:..." models
 
