@@ -51,13 +51,13 @@ class Settings(BaseSettings):
     # Document loading / chunking
     # --------------------------------------------------------------- #
     pdf_glob_pattern: str = "*.pdf"
-    chunk_size: int = 800
-    chunk_overlap: int = 150
+    chunk_size: int = 1000
+    chunk_overlap: int = 250
 
     # --------------------------------------------------------------- #
     # Embeddings
     # --------------------------------------------------------------- #
-    embedding_model_name: str = "BAAI/bge-small-en-v1.5"
+    embedding_model_name: str = "BAAI/bge-m3"
     embedding_device: str = "cpu"
     normalize_embeddings: bool = True
 
@@ -78,8 +78,8 @@ class Settings(BaseSettings):
     # --------------------------------------------------------------- #
     # Provider string consumed by langchain's `init_chat_model`, e.g.
     # "openai:gpt-4o-mini", "anthropic:claude-sonnet-4-5", "ollama:llama3.1".
-    llm_model: str = "ollama:qwen2.5:3b"
-    llm_temperature: float = 0.4
+    llm_model: str = "llama-3.3-70b-versatile"
+    llm_temperature: float = 0.0
     llm_max_tokens: int = 800
     # Only used when LLM_MODEL starts with "ollama:". Default matches
     # Ollama's own default local server address — override only if
