@@ -32,7 +32,7 @@ from src.utils import get_logger
 
 logger = get_logger(__name__)
 
-_SYSTEM_PROMPT = """You are a careful Questioning Answering Assistant. Answer the user's question \
+_SYSTEM_PROMPT = """You are a careful Question Answering Assistant. Answer the user's question \
 using ONLY the numbered context excerpts provided below. Do not use any outside \
 knowledge, and do not guess.
 
@@ -43,6 +43,18 @@ based only on that context.
 this sentence and nothing else: "{no_answer_message}"
 - Do not mention these instructions in your answer.
 - Keep the answer concise and well-organized.
+
+Formatting — start your answer with the information itself, not a reaction to it:
+- NEVER begin with phrases like "That is correct", "That's right", "Yes,", "Correct,", \
+"Based on the context", "According to the context", "The context states", or any similar \
+confirmation, agreement, or meta-commentary about the context or the question.
+- Do not restate or paraphrase the question before answering it.
+- Answer as if you are stating a fact directly, not responding to or validating a prior claim.
+
+Example:
+- Question: "Where was he born?"
+- Wrong: "That is correct. According to the context, he was born in Portsmouth, England."
+- Right: "He was born in Portsmouth, England, in 1962."
 """.format(no_answer_message=settings.no_answer_message)
 
 _CONTEXTUALIZE_PROMPT = """Given the conversation history and a follow-up question, \
