@@ -78,7 +78,7 @@ class Settings(BaseSettings):
     # --------------------------------------------------------------- #
     # Provider string consumed by langchain's `init_chat_model`, e.g.
     # "openai:gpt-4o-mini", "anthropic:claude-sonnet-4-5", "ollama:llama3.1".
-    llm_model: str = "llama-3.3-70b-versatile"
+    llm_model: str = "groq:llama-3.3-70b-versatile"
     llm_temperature: float = 0.0
     llm_max_tokens: int = 800
     # Only used when LLM_MODEL starts with "ollama:". Default matches
