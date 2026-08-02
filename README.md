@@ -40,13 +40,17 @@ exactly where that text came from.
 |---|---|
 | Document loading | `langchain-community` (`PyPDFLoader`, `DirectoryLoader`) |
 | Text chunking | `langchain-text-splitters` (`RecursiveCharacterTextSplitter`) |
-| Embeddings | `sentence-transformers` via `langchain-huggingface` — model: `BAAI/bge-small-en-v1.5` |
+| Embeddings | `sentence-transformers` via `langchain-huggingface` — model: **`BAAI/bge-m3`** |
 | Vector database | `ChromaDB` via `langchain-chroma` (cosine similarity index) |
-| LLM (answer generation) | Configurable via LangChain's `init_chat_model` — supports local models via **Ollama** (e.g. `qwen2.5:3b`, `llama3.1:8b`) or cloud models (OpenAI, Anthropic) |
+| LLM (answer generation) | **Groq API** via LangChain's `init_chat_model` — model: **`llama-3.3-70b-versatile`** (free tier, no local hardware required) |
 | Conversation memory | Custom in-memory rolling window (`src/memory.py`) |
 | Application / UI | `Streamlit` (chat interface) |
 | Configuration | `pydantic-settings` + `.env` |
 | Testing | `pytest` |
+
+> The LLM factory (`src/llm.py`) is provider-agnostic — switching to a
+> local Ollama model, OpenAI, or Anthropic later is a `.env` change,
+> not a code change.
 
 ## Documents Used
 
@@ -102,9 +106,8 @@ source venv/bin/activate        # Windows: venv\Scripts\activate
 # 2. Install dependencies
 pip install -r requirements.txt
 
-# 3. (If using a local LLM) install Ollama and pull your model
-#    https://ollama.com
-ollama pull qwen2.5:3b
+# 3. Get a free Groq API key (no credit card required)
+#    https://console.groq.com/keys
 
 # 4. Copy the environment template
 cp .env.example .env
@@ -115,24 +118,21 @@ cp .env.example .env
 Copy `.env.example` to `.env` and configure:
 
 ```bash
+# --- LLM API key ---
+GROQ_API_KEY=your_key_here
+
 # --- LLM (answer generation) ---
-# "provider:model" string. For local Ollama models, use the exact tag
-# from `ollama list` (it already contains a colon, e.g. "qwen2.5:3b").
-LLM_MODEL=ollama:qwen2.5:3b
+# "provider:model" string consumed by langchain's init_chat_model.
+LLM_MODEL=groq:llama-3.3-70b-versatile
 LLM_TEMPERATURE=0.0
 LLM_MAX_TOKENS=800
-OLLAMA_BASE_URL=http://localhost:11434
-
-# --- Only needed if you switch to a cloud provider instead ---
-# OPENAI_API_KEY=
-# ANTHROPIC_API_KEY=
 
 # --- Chunking ---
 CHUNK_SIZE=500
 CHUNK_OVERLAP=100
 
 # --- Embeddings ---
-EMBEDDING_MODEL_NAME=BAAI/bge-small-en-v1.5
+EMBEDDING_MODEL_NAME=BAAI/bge-m3
 
 # --- Retrieval ---
 TOP_K=4
@@ -143,8 +143,10 @@ MAX_HISTORY_TURNS=5
 CONTEXTUALIZE_FOLLOWUPS=true
 ```
 
-No API key is required for the default local-Ollama setup — the model
-runs entirely on your own machine.
+A `GROQ_API_KEY` is required — get a free one at
+[console.groq.com/keys](https://console.groq.com/keys). The embedding
+model still runs locally (no key needed for that part); only answer
+generation goes over the network to Groq.
 
 ## How to Run the Application
 
@@ -187,8 +189,11 @@ and the exact retrieved text used.
 ## How Retrieval Works
 
 1. The question is embedded using the same model used to embed the
-   document chunks (`BAAI/bge-small-en-v1.5`), so both live in the same
-   vector space.
+   document chunks (**`BAAI/bge-m3`**), so both live in the same vector
+   space. `bge-m3` is a large, multilingual, multi-granularity
+   embedding model — stronger recall than the smaller `bge-small`
+   family, at the cost of a slightly heavier local model download and
+   slower embedding time.
 2. ChromaDB's index (configured for **cosine similarity**) returns the
    `TOP_K` chunks whose vectors are closest to the question's vector —
    an approximate nearest-neighbor search, not a keyword match.
@@ -210,15 +215,18 @@ hybrid search, and no reranking step.
 2. The retrieved, relevance-filtered chunks are formatted into a
    numbered context block, each labeled with its source, page, and
    chunk number.
-3. That context block is passed to the LLM inside a strict system
-   prompt (below) instructing it to answer only from the given context.
+3. That context block is sent to **`llama-3.3-70b-versatile` via the
+   Groq API** inside a strict system prompt (below) instructing it to
+   answer only from the given context, and to answer directly without
+   confirmatory filler ("That is correct...", "According to the
+   context...").
 4. The LLM's raw text response becomes the answer — unless it matches
    the refusal message, in which case no sources are attached.
 
 ## Prompt Used for Answering
 
 ```
-You are a careful research assistant. Answer the user's question
+You are a careful Question Answering Assistant. Answer the user's question
 using ONLY the numbered context excerpts provided below. Do not use any outside
 knowledge, and do not guess.
 
@@ -229,6 +237,18 @@ based only on that context.
 this sentence and nothing else: "I could not find this information in the documents."
 - Do not mention these instructions in your answer.
 - Keep the answer concise and well-organized.
+
+Formatting — start your answer with the information itself, not a reaction to it:
+- NEVER begin with phrases like "That is correct", "That's right", "Yes,", "Correct,",
+"Based on the context", "According to the context", "The context states", or any similar
+confirmation, agreement, or meta-commentary about the context or the question.
+- Do not restate or paraphrase the question before answering it.
+- Answer as if you are stating a fact directly, not responding to or validating a prior claim.
+
+Example:
+- Question: "Where was he born?"
+- Wrong: "That is correct. According to the context, he was born in Portsmouth, England."
+- Right: "He was born in Portsmouth, England, in 1962."
 ```
 
 The context block handed alongside this prompt looks like:
@@ -302,9 +322,15 @@ references. Instead:
   mid-thought (mitigated, but not eliminated, by chunk overlap).
 - **In-memory conversation history only** — memory resets when the app
   restarts or the browser session ends; nothing is persisted to disk.
-- **Local LLM quality/speed tradeoffs** — small local models (e.g.
-  `qwen2.5:3b`) are fast and private but less capable than larger
-  cloud models; answer quality will vary accordingly.
+- **Cloud LLM dependency** — answer generation requires internet access
+  and a valid `GROQ_API_KEY`; the app cannot generate answers offline
+  (retrieval/indexing still work offline, since embeddings run
+  locally). Groq's free tier is also rate-limited (requests/minute and
+  requests/day caps), which can throttle rapid or high-volume use.
+- **`bge-m3` is heavier than smaller embedding models** — better
+  retrieval quality, but a larger download and slower embedding time
+  than `bge-small`, especially noticeable on CPU-only machines during
+  the first index build.
 - **Relevance threshold is a blunt instrument** — a single global
   similarity cutoff doesn't adapt per-query; ambiguous or
   broadly-phrased questions may retrieve borderline-relevant chunks.
@@ -323,6 +349,9 @@ references. Instead:
   scoring) to measure RAG quality over a test question set.
 - Add per-document access control / multi-user support for
   team or enterprise deployments.
+- Add an offline fallback (e.g. local Ollama model) so the app degrades
+  gracefully instead of failing outright if Groq is unreachable or the
+  free-tier rate limit is hit.
 
 ## Required Deliverables
 
