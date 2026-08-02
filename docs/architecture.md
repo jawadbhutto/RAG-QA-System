@@ -17,7 +17,7 @@ flowchart LR
     A["📄 data/raw/*.pdf\n(one or more PDFs)"]:::input
     B["loaders.py\nload_pdfs()\n→ 1 Document per page"]:::process
     C["splitter.py\nsplit_documents()\n→ ~500-char chunks\n+ source/page/chunk_number tags"]:::process
-    D["embeddings.py\nget_embedding_model()\nBAAI/bge-small-en-v1.5"]:::model
+    D["embeddings.py\nget_embedding_model()\nBAAI/bge-m3"]:::model
     E[("🗄️ vector_store.py\nChromaDB\ncosine-indexed, deduplicated")]:::storage
 
     A --> B --> C --> D --> E
@@ -32,6 +32,9 @@ flowchart LR
 it's the only module that touches every stage of ingestion. Re-running
 it is safe: chunks are deduplicated by a deterministic
 `source_page_chunknumber` ID, so nothing gets indexed twice.
+
+`bge-m3` runs locally via `sentence-transformers` — no API key or
+network call needed for embedding, only for the LLM step later.
 
 ---
 
@@ -49,7 +52,7 @@ flowchart TD
     T{"Any chunk clears\nRELEVANCE_THRESHOLD?"}:::decision
     NF["🚫 Return refusal:\n'I could not find this\ninformation in the documents.'\n(no LLM call)"]:::refuse
     CB["qa_chain.py\n_build_context_block()\nnumbered, cited excerpts"]:::process
-    LLM["llm.py → get_llm()\nOllama / OpenAI / Anthropic\nanswers strictly from context"]:::model
+    LLM["llm.py → get_llm()\nGroq API\nllama-3.3-70b-versatile\nanswers strictly from context"]:::model
     IS{"LLM says it\ncan't answer?"}:::decision
     NF2["🚫 Return refusal\n(sources dropped)"]:::refuse
     OK["✅ QAResult\nanswer + sources\n(document, page, chunk, text)"]:::output
@@ -73,6 +76,9 @@ flowchart TD
     classDef output fill:#B2DFDB,stroke:#00897B,stroke-width:2px,color:#003D33
 ```
 
+The LLM step (`CB → LLM`) is the only network call to Groq in the
+entire flow — retrieval, thresholding, and memory are all local.
+
 ---
 
 ## 3. Technology Stack
@@ -93,17 +99,17 @@ flowchart TB
         MEM["memory.py"]:::core
     end
 
-    subgraph DATA["💾 Data Layer"]
+    subgraph DATA["💾 Data Layer (local, no API key)"]
         direction LR
-        EMB["HuggingFace\nBAAI/bge-small-en-v1.5"]:::data
+        EMB["HuggingFace\nBAAI/bge-m3"]:::data
         VDB[("ChromaDB\ncosine index")]:::data
     end
 
-    subgraph LLMS["🤖 LLM Layer"]
+    subgraph LLMS["🤖 LLM Layer (cloud, requires GROQ_API_KEY)"]
         direction LR
-        OL["Ollama (local)\nqwen2.5:3b / llama3.1:8b"]:::llm
-        OA["OpenAI\n(optional)"]:::llm
-        AN["Anthropic\n(optional)"]:::llm
+        GR["Groq API\nllama-3.3-70b-versatile"]:::llm
+        OL["Ollama (local)\noptional fallback"]:::llmalt
+        OA["OpenAI / Anthropic\noptional"]:::llmalt
     end
 
     S --> RAG
@@ -114,7 +120,12 @@ flowchart TB
     classDef core fill:#BBDEFB,stroke:#1E88E5,stroke-width:2px,color:#0D2B4E
     classDef data fill:#C8E6C9,stroke:#43A047,stroke-width:2px,color:#173C1D
     classDef llm fill:#E1BEE7,stroke:#8E24AA,stroke-width:2px,color:#3A0A47
+    classDef llmalt fill:#F3E5F5,stroke:#CE93D8,stroke-width:2px,color:#4A1458
 ```
+
+`llm.py` is provider-agnostic (LangChain's `init_chat_model`) — Groq
+is the active default, but Ollama/OpenAI/Anthropic remain one `.env`
+change away with no code changes.
 
 ---
 
@@ -128,7 +139,7 @@ comes directly from `RetrievedChunk` objects assembled in
 ```mermaid
 flowchart LR
     A["Retrieved chunks\n(real metadata)"]:::real --> B["Context block\nsent to LLM"]:::real
-    B --> C["LLM generates\nANSWER TEXT ONLY"]:::model
+    B --> C["Groq LLM generates\nANSWER TEXT ONLY"]:::model
     A -.->|"citations built\ndirectly from here,\nnot from the LLM"| D["Sources shown\nto user"]:::output
 
     classDef real fill:#C8E6C9,stroke:#43A047,stroke-width:2px,color:#173C1D
@@ -155,6 +166,35 @@ In both cases, the user sees the same message:
 
 ---
 
+## Answer Style Enforcement
+
+Beyond grounding and citations, the system prompt also enforces *how*
+the LLM opens each answer. Smaller/faster conversational models like
+`llama-3.3-70b-versatile` tend to default to confirmatory filler
+("That is correct. According to the context, ..."), which reads
+awkwardly for a fresh question. The prompt explicitly bans this class
+of phrasing and shows a wrong/right example, so the model states facts
+directly instead of reacting to them.
+
+```mermaid
+flowchart LR
+    P["System prompt:\nban confirmation phrases\n+ wrong/right example"]:::model
+    Q["Question: 'Where was he born?'"]:::input
+    W["❌ 'That is correct.\nAccording to the context,\nhe was born in...'"]:::refuse
+    G["✅ 'He was born in\nPortsmouth, England, in 1962.'"]:::output
+
+    P --> Q
+    Q -.->|without rule| W
+    Q -->|with rule| G
+
+    classDef input fill:#FFE0B2,stroke:#FB8C00,stroke-width:2px,color:#4A2C00
+    classDef model fill:#E1BEE7,stroke:#8E24AA,stroke-width:2px,color:#3A0A47
+    classDef refuse fill:#FFCDD2,stroke:#E53935,stroke-width:2px,color:#5A0F0C
+    classDef output fill:#B2DFDB,stroke:#00897B,stroke-width:2px,color:#003D33
+```
+
+---
+
 ## Conversation Memory
 
 `ConversationMemory` (`memory.py`) is a simple in-memory, per-session
@@ -177,7 +217,40 @@ flowchart LR
 ```
 
 It's used in exactly one place: `_contextualize_question()` sends the
-history plus the new question to the LLM and asks it to rewrite
+history plus the new question to the LLM (Groq) and asks it to rewrite
 ambiguous follow-ups into standalone questions **before** retrieval
 runs. Retrieval and the final answer are otherwise stateless — memory
 affects what gets searched for, not what "counts" as relevant.
+
+---
+
+## Local vs. Cloud Boundary
+
+Worth calling out explicitly, since it affects offline behavior and
+data privacy: only the LLM step leaves your machine.
+
+```mermaid
+flowchart TB
+    subgraph LOCAL["💻 Runs entirely on your machine"]
+        direction LR
+        L1["PDF loading"]:::localbox
+        L2["Chunking"]:::localbox
+        L3["bge-m3 embedding"]:::localbox
+        L4["ChromaDB storage & search"]:::localbox
+        L5["Relevance thresholding"]:::localbox
+        L6["Conversation memory"]:::localbox
+    end
+
+    subgraph CLOUD["☁️ Sent to Groq's servers"]
+        direction LR
+        C1["Retrieved context\n+ your question"]:::cloudbox
+    end
+
+    LOCAL -->|"only the final\ncontext + question"| CLOUD
+
+    classDef localbox fill:#C8E6C9,stroke:#43A047,stroke-width:2px,color:#173C1D
+    classDef cloudbox fill:#E1BEE7,stroke:#8E24AA,stroke-width:2px,color:#3A0A47
+```
+
+Indexing and retrieval work fully offline; only asking a question
+requires internet access and a valid `GROQ_API_KEY`.
