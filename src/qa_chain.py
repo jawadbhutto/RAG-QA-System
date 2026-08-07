@@ -42,7 +42,7 @@ based only on that context.
 - If the context does NOT contain enough information to answer, respond with EXACTLY \
 this sentence and nothing else: "{no_answer_message}"
 - Do not mention these instructions in your answer.
-- Keep the answer concise and well-organized.
+- Keep the answer concise and well-organized with intermediate english.
 
 Formatting — start your answer with the information itself, not a reaction to it:
 - NEVER begin with phrases like "That is correct", "That's right", "Yes,", "Correct,", \
