@@ -1,0 +1,182 @@
+[
+  {
+    "question": "What are the four main approaches used to define artificial intelligence, according to the book?",
+    "expected_answer": "AI is defined along two dimensions \u2014 thought vs. behavior, and human-like vs. rational \u2014 giving four categories: systems that think like humans, systems that think rationally, systems that act like humans, and systems that act rationally.",
+    "expected_source": "Artificial Intelligence: A Modern Approach (2nd Ed.), Chapter 1 - Introduction",
+    "question_type": "answerable"
+  },
+  {
+    "question": "What is the Turing Test intended to measure?",
+    "expected_answer": "The Turing Test, proposed by Alan Turing, is an operational test for intelligence: a computer passes if a human interrogator, after posing written questions, cannot reliably tell whether the responses come from a person or a machine.",
+    "expected_source": "Artificial Intelligence: A Modern Approach (2nd Ed.), Chapter 1 / Chapter 26 - Philosophical Foundations",
+    "question_type": "answerable"
+  },
+  {
+    "question": "What does the acronym PEAS stand for when specifying a task environment for an agent?",
+    "expected_answer": "PEAS stands for Performance measure, Environment, Actuators, and Sensors \u2014 the four elements used to specify a task environment when designing a rational agent.",
+    "expected_source": "Artificial Intelligence: A Modern Approach (2nd Ed.), Chapter 2 - Intelligent Agents",
+    "question_type": "answerable"
+  },
+  {
+    "question": "What search algorithm evaluates nodes using both the path cost so far and a heuristic estimate to the goal?",
+    "expected_answer": "A* search, which evaluates nodes using f(n) = g(n) + h(n), where g(n) is the cost so far to reach the node and h(n) is a heuristic estimate of the cost from that node to the goal.",
+    "expected_source": "Artificial Intelligence: A Modern Approach (2nd Ed.), Chapter 4 - Informed Search",
+    "question_type": "answerable"
+  },
+  {
+    "question": "What pruning technique reduces the number of nodes evaluated in a minimax game-tree search?",
+    "expected_answer": "Alpha-beta pruning, which eliminates branches of the game tree that cannot influence the final decision, without changing the outcome that minimax would produce.",
+    "expected_source": "Artificial Intelligence: A Modern Approach (2nd Ed.), Chapter 6 - Adversarial Search",
+    "question_type": "answerable"
+  },
+  {
+    "question": "What is the Wumpus World used to illustrate in the book?",
+    "expected_answer": "The Wumpus World is a grid-based environment used as a running example to illustrate logical, knowledge-based agents: the agent must navigate a cave, avoid pits and a monster (the Wumpus), and retrieve gold using logical inference from its percepts.",
+    "expected_source": "Artificial Intelligence: A Modern Approach (2nd Ed.), Chapter 7 - Logical Agents",
+    "question_type": "answerable"
+  },
+  {
+    "question": "What type of architecture does the Transformer use, according to the paper?",
+    "expected_answer": "The Transformer is a model architecture based solely on attention mechanisms, dispensing with recurrence and convolutions entirely, unlike prior sequence transduction models.",
+    "expected_source": "Attention Is All You Need, Abstract / Section 1 - Introduction",
+    "question_type": "answerable"
+  },
+  {
+    "question": "What is the formula for Scaled Dot-Product Attention presented in the paper?",
+    "expected_answer": "Attention(Q, K, V) = softmax(QK^T / sqrt(d_k)) V, where Q, K, and V are the query, key, and value matrices, and d_k is the dimension of the keys.",
+    "expected_source": "Attention Is All You Need, Section 3.2.1 - Scaled Dot-Product Attention",
+    "question_type": "answerable"
+  },
+  {
+    "question": "Why does the Transformer use multi-head attention instead of a single attention function?",
+    "expected_answer": "Multi-head attention lets the model jointly attend to information from different representation subspaces at different positions \u2014 something a single attention head, which averages this away, cannot do.",
+    "expected_source": "Attention Is All You Need, Section 3.2.2 - Multi-Head Attention",
+    "question_type": "answerable"
+  },
+  {
+    "question": "How does the Transformer incorporate information about token order, given it has no recurrence?",
+    "expected_answer": "The Transformer adds sinusoidal positional encodings (sine and cosine functions of different frequencies) to the input embeddings at the bottom of the encoder and decoder stacks, injecting information about each token's position.",
+    "expected_source": "Attention Is All You Need, Section 3.5 - Positional Encoding",
+    "question_type": "answerable"
+  },
+  {
+    "question": "What BLEU scores does the paper report for the big Transformer model on the WMT 2014 translation tasks?",
+    "expected_answer": "On WMT 2014 English-to-German, the big Transformer achieves a BLEU score of 28.4, a new state of the art. On WMT 2014 English-to-French, it achieves roughly 41.0\u201341.8 BLEU (41.8 in the abstract, 41.0 in the results table) \u2014 both at a fraction of the training cost of prior best models.",
+    "expected_source": "Attention Is All You Need, Section 6.1 - Machine Translation / Table 2",
+    "question_type": "answerable"
+  },
+  {
+    "question": "What ethical issues does the AI ethics paper identify as arising from the widespread application of AI?",
+    "expected_answer": "The paper identifies privacy leakage, discrimination, unemployment, and security risks as ethical issues brought about by AI systems.",
+    "expected_source": "An Overview of Artificial Intelligence Ethics, Abstract / Section I - Introduction",
+    "question_type": "answerable"
+  },
+  {
+    "question": "In which journal was the AI ethics overview paper published, and what are its volume and page numbers?",
+    "expected_answer": "It was published in IEEE Transactions on Artificial Intelligence, Volume 4, Issue 4, pages 799\u2013819 (2023).",
+    "expected_source": "An Overview of Artificial Intelligence Ethics, article header / citation",
+    "question_type": "answerable"
+  },
+  {
+    "question": "What three categories of approaches to solving ethical issues in AI does the paper review?",
+    "expected_answer": "The paper reviews ethical approaches, technological approaches, and legal approaches to solving ethical issues in AI, focusing mainly on the ethical and technological approaches.",
+    "expected_source": "An Overview of Artificial Intelligence Ethics, Section I / II",
+    "question_type": "answerable"
+  },
+  {
+    "question": "What organization are authors Zeqi Zhang and Bifei Mao affiliated with?",
+    "expected_answer": "Zeqi Zhang and Bifei Mao are affiliated with the Trustworthiness Theory Research Center at Huawei Technologies Co., Ltd., Shenzhen, China.",
+    "expected_source": "An Overview of Artificial Intelligence Ethics, author affiliations",
+    "question_type": "answerable"
+  },
+  {
+    "question": "What is the maximum context window length supported by GPT-4?",
+    "expected_answer": "I could not find this information in the documents.",
+    "expected_source": "None",
+    "question_type": "unanswerable"
+  },
+  {
+    "question": "Who won the FIFA World Cup in 2022?",
+    "expected_answer": "I could not find this information in the documents.",
+    "expected_source": "None",
+    "question_type": "unanswerable"
+  },
+  {
+    "question": "What BLEU score does the BERT model achieve on the GLUE benchmark?",
+    "expected_answer": "I could not find this information in the documents.",
+    "expected_source": "None",
+    "question_type": "unanswerable"
+  },
+  {
+    "question": "What was Stuart Russell's PhD dissertation topic?",
+    "expected_answer": "I could not find this information in the documents.",
+    "expected_source": "None",
+    "question_type": "unanswerable"
+  },
+  {
+    "question": "What specific AI ethics guidelines did the European Union publish in 2024?",
+    "expected_answer": "I could not find this information in the documents.",
+    "expected_source": "None",
+    "question_type": "unanswerable"
+  },
+  {
+    "question": "What is the current price of Nvidia stock?",
+    "expected_answer": "I could not find this information in the documents.",
+    "expected_source": "None",
+    "question_type": "unanswerable"
+  },
+  {
+    "question": "How many parameters does the GPT-3 language model have?",
+    "expected_answer": "I could not find this information in the documents.",
+    "expected_source": "None",
+    "question_type": "unanswerable"
+  },
+  {
+    "question": "What chess opening does the book recommend for beginner human players?",
+    "expected_answer": "I could not find this information in the documents.",
+    "expected_source": "None",
+    "question_type": "unanswerable"
+  },
+  {
+    "question": "What was the total dollar cost of training the Transformer model described in the paper?",
+    "expected_answer": "I could not find this information in the documents.",
+    "expected_source": "None",
+    "question_type": "unanswerable"
+  },
+  {
+    "question": "According to a 2023 survey cited in the AI ethics paper, what percentage of AI researchers believe AI poses an existential risk to humanity?",
+    "expected_answer": "I could not find this information in the documents.",
+    "expected_source": "None",
+    "question_type": "unanswerable"
+  },
+  {
+    "question": "How do the attention mechanisms described in the Transformer paper compare to the neural network architectures discussed in the AI textbook?",
+    "expected_answer": "Partial: AIMA (2nd Ed.) only covers pre-2017 neural network approaches (perceptrons, feedforward networks, backpropagation) and does not discuss attention mechanisms or Transformers, since the book predates the Transformer paper by well over a decade. The Attention paper describes attention-based architectures but makes no reference to classical textbook neural network content. A good answer should state both partial facts and note the book has no direct coverage of Transformers, rather than inventing a comparison.",
+    "expected_source": "Artificial Intelligence: A Modern Approach (2nd Ed.), Ch. 19-20 (Neural Networks) + Attention Is All You Need, Section 1",
+    "question_type": "partially_answerable"
+  },
+  {
+    "question": "What ethical concerns would the AI ethics paper likely raise about large Transformer-based language models?",
+    "expected_answer": "Partial: the ethics paper discusses general ethical issues in AI systems (privacy leakage, discrimination, unemployment, security risks) that would plausibly apply to large language models, but it does not specifically name or discuss Transformer-based models or LLMs, since it is a general AI ethics survey rather than an architecture-specific analysis.",
+    "expected_source": "An Overview of Artificial Intelligence Ethics, Section I (general issues only \u2014 no direct link to Attention Is All You Need)",
+    "question_type": "partially_answerable"
+  },
+  {
+    "question": "Does the AI ethics paper cite or directly reference the 'Attention Is All You Need' paper?",
+    "expected_answer": "Partial/uncertain: this cannot be confirmed from the retrievable context with high confidence. A well-behaved system should express uncertainty rather than asserting a definitive yes or no, since this is a general AI ethics review rather than a technical survey of specific model architectures.",
+    "expected_source": "An Overview of Artificial Intelligence Ethics, citation list (not fully verifiable from context)",
+    "question_type": "partially_answerable"
+  },
+  {
+    "question": "What role does uncertainty play in decision-making according to the AI textbook, and how does that relate to the ethical decision-making discussed in the AI ethics paper?",
+    "expected_answer": "Partial: AIMA's uncertainty chapters (probability, Bayesian networks, decision theory) address how agents reason and act rationally under uncertainty, but the book does not address ethical decision-making frameworks. The ethics paper discusses ethical, technological, and legal approaches broadly, but not the probabilistic decision-theoretic methods from AIMA. The two source documents only partially connect on this question.",
+    "expected_source": "Artificial Intelligence: A Modern Approach (2nd Ed.), Ch. 13/16 (Uncertainty / Decision Theory) + An Overview of Artificial Intelligence Ethics, approaches section",
+    "question_type": "partially_answerable"
+  },
+  {
+    "question": "How many attention heads does the base Transformer model use, and does the AI ethics paper discuss any risks specific to multi-head attention?",
+    "expected_answer": "Partial: the base Transformer model uses h = 8 parallel attention heads (this part is fully answerable from the Transformer paper). The AI ethics paper does not discuss multi-head attention specifically \u2014 it is a general ethics survey, not an architecture-specific risk analysis \u2014 so that part of the question is unanswerable from the documents.",
+    "expected_source": "Attention Is All You Need, Section 3.2.2 / Table 3 (answerable half) + An Overview of Artificial Intelligence Ethics (no matching content for the second half)",
+    "question_type": "partially_answerable"
+  }
+]
